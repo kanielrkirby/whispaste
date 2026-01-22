@@ -41,14 +41,16 @@ archlinux:
 
 all: deb rpm apk archlinux pip snap
 
-everything: deb rpm apk archlinux pip snap flatpak appimage
+everything: deb rpm apk archlinux pip flatpak appimage
 
 clean:
 	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst *.snap *.flatpak *.AppImage
 
-snap:
-	nix build .#snapPackages.x86_64-linux
-	cd result && tar -czf ../whispaste-snap.tar.gz *
+ snap:
+	@echo "Snap requires snapcraft (not in nixpkgs). Install with:"
+	@echo "  sudo snap install snapcraft --classic"
+	@echo "Then: cd snap && snapcraft"
+	@command -v snapcraft 2>/dev/null || @echo "Note: snapcraft not installed - skipping"
 
 flatpak:
 	flatpak-builder --user --install build flatpak/com.github.whispaste.yml
