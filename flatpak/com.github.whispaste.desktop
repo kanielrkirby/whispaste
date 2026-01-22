@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=whispaste
+Comment=Voice-to-paste tool using OpenAI Whisper
+Exec=whispaste
+Icon=com.github.whispaste
+Type=Application
+Terminal=true
+Categories=Audio;Utility;
+Keywords=audio;speech;transcription;whisper;

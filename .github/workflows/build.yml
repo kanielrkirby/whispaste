@@ -1,0 +1,139 @@
+name: Build Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  pypi:
+    name: PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build wheel/sdist
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  deb-rpm-apk-arch:
+    name: Linux packages
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        format: [deb, rpm, apk, arch]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v24
+        with:
+          nix_path: nixpkgs=channel:nixpkgs-unstable
+
+      - name: Build Nix package
+        run: nix build
+
+      - uses: cachix/cachix-action@v14
+        with:
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          name: kanielrkirby
+
+      - name: Install nfpm
+        run: nix-env -iA nixpkgs.nfpm
+
+      - name: Build ${{ matrix.format }}
+        run: nfpm package -p ${{ matrix.format }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whispaste-${{ matrix.format }}
+          path: whispaste*.*
+
+  appimage:
+    name: AppImage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v24
+        with:
+          nix_path: nixpkgs=channel:nixpkgs-unstable
+
+      - name: Build AppImage
+        run: |
+          nix-env -iA nixpkgs.nix-bundle
+          $(nix-build -A nix-bundle)/nix2appimage.sh $(nix build)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whispaste-appimage
+          path: whispaste*.AppImage
+
+  snap:
+    name: Snap
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: snapcore/action-build@v1
+        with:
+          snapcraft-channel: 8.x/stable
+
+      - name: Publish to Snap Store
+        uses: snapcore/action-publish@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          snapcraft-token: ${{ secrets.SNAP_TOKEN }}
+          snap: whispaste*.snap
+
+  flatpak:
+    name: Flatpak
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-46
+      options: --user --cap-add=SYS_PTRACE
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install flatpak-builder
+        run: flatpak install flathub org.flatpak.Builder
+
+      - name: Build Flatpak
+        run: flatpak-builder --user --install --repo=repo build flatpak/com.github.whispaste.yml
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whispaste-flatpak
+          path: whispaste.flatpak
+
+  brew:
+    name: Homebrew
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout Homebrew
+        run: brew tap kanielrkirby/whispaste
+
+      - name: Update formula
+        run: |
+          cd $(brew --repo kanielrkirby/whispaste)
+          git fetch origin main
+          git checkout main
+          curl -o whispaste.rb https://raw.githubusercontent.com/kanielrkirby/whispaste/main/homebrew/whispaste.rb
+          git add whispaste.rb
+          git diff-index --quiet HEAD || (git commit -m "Update whispaste to ${{ github.ref_name }}" && git push)
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}

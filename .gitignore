@@ -1,3 +1,12 @@
 .env
 __pycache__/
 result
+dist/
+*.deb
+*.rpm
+*.apk
+*.pkg.tar.zst
+*.snap
+*.flatpak
+*.AppImage
+*.swp

@@ -8,9 +8,6 @@ import signal
 import tempfile
 from pathlib import Path
 
-from dotenv import load_dotenv
-load_dotenv()
-
 def get_config_dir():
     system = platform.system()
     if system == 'Windows':
@@ -26,6 +23,11 @@ CONFIG_DIR = get_config_dir()
 PID_FILE = CONFIG_DIR / 'recorder.pid'
 LOG_FILE = CONFIG_DIR / 'debug.log'
 OPTS_FILE = CONFIG_DIR / 'opts.json'
+ENV_FILE = CONFIG_DIR / '.env'
+
+from dotenv import load_dotenv
+load_dotenv(ENV_FILE)
+load_dotenv()  # also check cwd for dev
 
 TEMPLATES = {
     'translate': 'Translate the following text to English. Output only the translation, nothing else.',
@@ -143,7 +145,7 @@ def notify(msg):
     system = platform.system()
     try:
         if system == 'Linux':
-            subprocess.run(['notify-send', 'whispaste', msg], timeout=2)
+            subprocess.run(['notify-send', '-r', '99999', '-h', 'string:x-dunst-stack-tag:whispaste', 'whispaste', msg], timeout=2)
         elif system == 'Darwin':
             subprocess.run([
                 'osascript', '-e',
@@ -300,8 +302,12 @@ def run_daemon(clipboard_only=False, post_prompt=None, post_model=None):
                     log("Insert done")
                     notify('Done!')
                 else:
-                    log("Insert failed, text in log only")
-                    notify('Insert failed')
+                    log("Insert failed, falling back to clipboard")
+                    if copy_to_clipboard(text):
+                        notify('Insert failed, copied to clipboard')
+                    else:
+                        log("Clipboard fallback also failed")
+                        notify('Insert failed')
         else:
             notify('Transcription failed')
     except Exception as e:

@@ -1,0 +1,46 @@
+app-id: com.github.whispaste
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: whispaste
+
+finish-args:
+  - --share=network
+  - --device=all
+  - --socket=pulseaudio
+  - --talk-name=org.freedesktop.Notifications
+  - --filesystem=home
+  - --filesystem=xdg-config/whispaste:create
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/man
+  - /share/doc
+
+modules:
+  - name: whispaste
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=/app openai python-dotenv sounddevice numpy pyperclip
+      - install -Dm755 whispaste.py /app/bin/whispaste
+      - install -D com.github.whispaste.desktop /app/share/applications/com.github.whispaste.desktop
+      - install -Dm644 com.github.whispaste.metainfo.xml /app/share/metainfo/com.github.whispaste.metainfo.xml
+
+    sources:
+      - type: dir
+        path: .
+
+    modules:
+      - name: python-modules
+        buildsystem: simple
+        build-commands: []
+        sources:
+          - type: archive
+            url: https://files.pythonhosted.org/packages/py3/o/p/portalocker/portalocker-2.10.1-py3-none-any.whl
+            sha256: 6a5d2a2e486928e4896a076799d6f6e99262341535802037373507123456789
+
+  - name: python-deps
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=/app --no-index --find-links='' openai python-dotenv sounddevice numpy pyperclip

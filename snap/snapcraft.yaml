@@ -1,0 +1,48 @@
+name: whispaste
+version: '0.1.0'
+summary: Voice-to-paste tool using OpenAI Whisper
+description: |
+  Simple voice-to-paste tool using OpenAI Whisper API.
+  Record audio with a hotkey and paste transcription at cursor.
+
+grade: stable
+confinement: strict
+base: core24
+
+parts:
+  whispaste:
+    plugin: python
+    source: .
+    python-packages:
+      - openai>=1.0.0
+      - python-dotenv>=1.0.0
+      - sounddevice>=0.5.0
+      - numpy>=1.24.0
+      - pyperclip>=1.8.0
+    stage-packages:
+      - libportaudio2
+      - libnotify4
+      - python3-xlib
+    override-build: |
+      craftctl default
+      # Create wrapper for XDG config
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cat > $CRAFT_PART_INSTALL/bin/whispaste.wrapper << 'EOF'
+      #!/bin/bash
+      export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+      export XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
+      exec $CRAFT_PART_INSTALL/lib/python*/site-packages/whispaste.py "$@"
+      EOF
+      chmod +x $CRAFT_PART_INSTALL/bin/whispaste.wrapper
+      ln -sf whispaste.wrapper $CRAFT_PART_INSTALL/bin/whispaste
+
+apps:
+  whispaste:
+    command: bin/whispaste
+    command-chain: [bin/whispaste.wrapper]
+    plugs:
+      - audio-record
+      - audio-playback
+      - network
+      - desktop
+      - home
