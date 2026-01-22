@@ -39,7 +39,7 @@ archlinux:
 	nix build
 	nfpm package -p archlinux
 
-all: deb rpm apk archlinux pip
+all: deb rpm apk archlinux pip snap
 
 everything: deb rpm apk archlinux pip snap flatpak appimage
 
@@ -47,7 +47,8 @@ clean:
 	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst *.snap *.flatpak *.AppImage
 
 snap:
-	cd snap && snapcraft
+	nix build .#snapPackages.x86_64-linux
+	cd result && tar -czf ../whispaste-snap.tar.gz *
 
 flatpak:
 	flatpak-builder --user --install build flatpak/com.github.whispaste.yml
