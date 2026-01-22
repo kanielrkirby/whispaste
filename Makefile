@@ -1,4 +1,4 @@
-.PHONY: help build deb rpm apk archlinux pip clean
+.PHONY: help build deb rpm apk archlinux pip snap flatpak appimage clean
 
 help:
 	@echo "Package whispaste for multiple platforms"
@@ -11,6 +11,10 @@ help:
 	@echo "  apk        - Build Alpine .apk package"
 	@echo "  archlinux  - Build Arch Linux package"
 	@echo "  all        - Build all nfpm packages"
+	@echo "  snap       - Build Snap package"
+	@echo "  flatpak    - Build Flatpak bundle"
+	@echo "  appimage    - Build AppImage bundle"
+	@echo "  everything  - Build all packages"
 	@echo "  clean      - Remove build artifacts"
 
 build:
@@ -35,7 +39,16 @@ archlinux:
 	nix build
 	nfpm package -p archlinux
 
-all: deb rpm apk archlinux pip
+all: deb rpm apk archlinux pip snap flatpak appimage
 
 clean:
-	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst
+	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst *.snap *.flatpak *.AppImage
+
+snap:
+	snapcraft snap/
+
+flatpak:
+	flatpak-builder --user --install build flatpak/com.github.whispaste.yml
+
+appimage:
+	nix2appimage.sh $(nix-build)
