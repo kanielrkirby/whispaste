@@ -59,6 +59,9 @@
             pkgs.xdotool
             pkgs.ydotool
             pkgs.wtype
+            pkgs.flatpak-builder
+            pkgs.nix-bundle
+            pkgs.gnumake
           ];
           shellHook = ''
             if [ -f .env ]; then
