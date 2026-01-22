@@ -3,9 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nix-snapd.url = "github:NixOS/nix-snapd";
+    nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, nix-snapd }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
@@ -32,12 +34,52 @@
             pkgs.xdotool
             pkgs.ydotool
             pkgs.wtype
+            pkgs.flatpak-builder
+            pkgs.gnumake
           ];
         meta = {
           description = "Simple voice-to-paste tool";
           license = pkgs.lib.licenses.mit;
         };
       });
+
+      # Snap build output for Linux
+      snapPackages = forAllSystems (system: 
+        if pkgs.stdenv.isLinux then
+          pkgs.buildEnv {
+            name = "whispaste-snap-${system}";
+            paths = [
+              (pkgs.python312Packages.buildPythonApplication {
+                pname = "whispaste";
+                version = "0.1.0";
+                pyproject = true;
+                src = ./.;
+                propagatedBuildInputs = with pkgs.python312Packages; [
+                  openai
+                  python-dotenv
+                  sounddevice
+                  numpy
+                  pyperclip
+                ];
+                nativeBuildInputs = [ pkgs.python312Packages.setuptools ];
+                buildInputs = [
+                  pkgs.portaudio
+                  pkgs.libnotify
+                ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+                  pkgs.wl-clipboard
+                  pkgs.xdotool
+                  pkgs.ydotool
+                  pkgs.wtype
+                ];
+                meta = {
+                  description = "Simple voice-to-paste tool";
+                  license = pkgs.lib.licenses.mit;
+                };
+              })
+            ];
+          }
+        else {}
+      );
 
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
@@ -60,7 +102,6 @@
             pkgs.ydotool
             pkgs.wtype
             pkgs.flatpak-builder
-            pkgs.nix-bundle
             pkgs.gnumake
           ];
           shellHook = ''
@@ -76,6 +117,7 @@
              echo "  nfpm package -p rpm    # Build .rpm"
              echo "  nfpm package -p apk    # Build .apk"
              echo "  nfpm package -p archlinux # Build Arch .pkg.tar.zst"
+             echo "  snap                  # Build Snap (Linux only)"
            '';
         };
       });
