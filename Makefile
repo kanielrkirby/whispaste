@@ -55,4 +55,4 @@ flatpak:
 
 appimage:
 	@echo "Run 'nix2appimage.sh' manually after installing nix-bundle"
-	nix2appimage.sh $$(nix-build)
+	nix-build
