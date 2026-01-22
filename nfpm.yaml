@@ -5,61 +5,53 @@ description: Simple voice-to-paste tool using OpenAI Whisper
 license: MIT
 homepage: https://github.com/kanielrkirby/whispaste
 
-deb:
-  dependencies:
-    - python3 (>= 3.12)
-    - libportaudio2
-    - libnotify4
-  recommends:
-    - xdotool
-    - wl-clipboard
-    - wtype
-  scripts:
-    postinstall: |
-      #!/bin/sh
-      echo "Installing Python dependencies via pip..."
-      pip3 install --break-system-packages openai python-dotenv sounddevice numpy pyperclip 2>/dev/null || \
-      pip3 install openai python-dotenv sounddevice numpy pyperclip
-    preremove: |
-      #!/bin/sh
-      pip3 uninstall -y whispaste 2>/dev/null || true
+depends:
+  - python3 >=3.12
+  - libportaudio2
+  - libnotify4
 
-rpm:
-  dependencies:
-    - python3 >= 3.12
-    - portaudio
-    - libnotify
-  recommends:
-    - xdotool
-    - wl-clipboard
-    - wtype
-  scripts:
-    posttrans: |
-      #!/bin/sh
-      pip3 install openai python-dotenv sounddevice numpy pyperclip
-
-apk:
-  dependencies:
-    - python3 >=3.12
-    - portaudio
-    - libnotify
-  recommends:
-    - xdotool
-    - wl-clipboard
-    - wtype
-
-archlinux:
-  dependencies:
-    - python>=3.12
-    - portaudio
-    - libnotify
-  recommends:
-    - xdotool
-    - wl-clipboard
-    - wtype
+recommends:
+  - xdotool
+  - wl-clipboard
+  - wtype
 
 contents:
   - src: result/bin/whispaste
     dst: /usr/bin/whispaste
     file_info:
       mode: 0755
+
+overrides:
+  deb:
+    depends:
+      - python3 (>= 3.12)
+      - libportaudio2
+      - libnotify4
+
+  rpm:
+    depends:
+      - python3 >= 3.12
+      - portaudio
+      - libnotify
+
+  apk:
+    depends:
+      - python3 >=3.12
+      - portaudio
+      - libnotify
+
+  archlinux:
+    depends:
+      - python>=3.12
+      - portaudio
+      - libnotify
+
+scripts:
+  postinstall: |
+    #!/bin/sh
+    pip3 install --break-system-packages openai python-dotenv sounddevice numpy pyperclip 2>/dev/null || \
+    pip3 install openai python-dotenv sounddevice numpy pyperclip
+
+  preremove: |
+    #!/bin/sh
+    pip3 uninstall -y whispaste 2>/dev/null || true

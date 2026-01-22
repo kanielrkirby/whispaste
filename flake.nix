@@ -69,14 +69,14 @@
               source .env
               set +a
             fi
-            echo "Package building available:"
-            echo "  nix build              # Build Nix package"
-            echo "  python -m build        # Build PyPI wheel/sdist"
-            echo "  nfpm package -p deb    # Build .deb"
-            echo "  nfpm package -p rpm    # Build .rpm"
-            echo "  nfpm package -p apk    # Build .apk"
-            echo "  nfpm package -p arch   # Build Arch .pkg.tar.zst"
-          '';
+             echo "Package building available:"
+             echo "  nix build              # Build Nix package"
+             echo "  python -m build        # Build PyPI wheel/sdist"
+             echo "  nfpm package -p deb    # Build .deb"
+             echo "  nfpm package -p rpm    # Build .rpm"
+             echo "  nfpm package -p apk    # Build .apk"
+             echo "  nfpm package -p archlinux # Build Arch .pkg.tar.zst"
+           '';
         };
       });
     };

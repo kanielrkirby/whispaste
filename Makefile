@@ -13,7 +13,7 @@ help:
 	@echo "  all       - Build all nfpm packages"
 	@echo "  clean     - Remove build artifacts"
 	@echo ""
-	@echo "CI/CD builds (require additional tools):"
+	@echo "CI/CD builds (run in dev shell):"
 	@echo "  snap      - Snap package"
 	@echo "  flatpak   - Flatpak bundle"
 	@echo "  appimage  - AppImage bundle"
@@ -43,15 +43,4 @@ arch:
 all: deb rpm apk arch pip
 
 clean:
-	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst
-
-# CI/CD builds - require nix-bundle, flatpak-builder, snapcraft
-
-snap:
-	snapcraft
-
-flatpak:
-	flatpak-builder --user build flatpak/com.github.whispaste.yml
-
-appimage:
-	nix2appimage.sh $(nix build)
+	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst *.snap *.flatpak *.AppImage

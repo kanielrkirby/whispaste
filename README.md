@@ -46,7 +46,7 @@ make all
 ### Build specific package
 
 ```bash
-make deb    # or rpm, apk, arch, pip
+make deb       # or rpm, apk, arch, pip
 ```
 
 ### Snap
