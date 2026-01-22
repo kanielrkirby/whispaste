@@ -1,4 +1,4 @@
-.PHONY: help build deb rpm apk archlinux pip snap flatpak appimage clean
+.PHONY: help build deb rpm apk archlinux pip snap flatpak appimage everything clean
 
 help:
 	@echo "Package whispaste for multiple platforms"
@@ -39,7 +39,9 @@ archlinux:
 	nix build
 	nfpm package -p archlinux
 
-all: deb rpm apk archlinux pip snap flatpak appimage
+all: deb rpm apk archlinux pip
+
+everything: deb rpm apk archlinux pip snap flatpak appimage
 
 clean:
 	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst *.snap *.flatpak *.AppImage
