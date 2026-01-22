@@ -36,7 +36,7 @@ overrides:
 
   apk:
     depends:
-      - python3 >=3.12
+      - python3 >= 3.12
       - portaudio
       - libnotify
 
@@ -47,11 +47,5 @@ overrides:
       - libnotify
 
 scripts:
-  postinstall: |
-    #!/bin/sh
-    pip3 install --break-system-packages openai python-dotenv sounddevice numpy pyperclip 2>/dev/null || \
-    pip3 install openai python-dotenv sounddevice numpy pyperclip
-
-  preremove: |
-    #!/bin/sh
-    pip3 uninstall -y whispaste 2>/dev/null || true
+  postinstall: ./scripts/postinstall.sh
+  preremove: ./scripts/preremove.sh
