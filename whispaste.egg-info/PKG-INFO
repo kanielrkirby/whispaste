@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: whispaste
+Version: 0.1.0
+Summary: Simple voice-to-paste tool
+Requires-Python: >=3.12
+License-File: LICENSE
+Requires-Dist: openai>=1.0.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: sounddevice>=0.5.0
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: pyperclip>=1.8.0
+Dynamic: license-file

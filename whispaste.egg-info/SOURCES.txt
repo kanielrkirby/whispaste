@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+whispaste.py
+whispaste.egg-info/PKG-INFO
+whispaste.egg-info/SOURCES.txt
+whispaste.egg-info/dependency_links.txt
+whispaste.egg-info/entry_points.txt
+whispaste.egg-info/requires.txt
+whispaste.egg-info/top_level.txt
