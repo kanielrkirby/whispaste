@@ -45,10 +45,10 @@ clean:
 	rm -rf dist result *.deb *.rpm *.apk *.pkg.tar.zst *.snap *.flatpak *.AppImage
 
 snap:
-	snapcraft snap/
+	cd snap && snapcraft
 
 flatpak:
 	flatpak-builder --user --install build flatpak/com.github.whispaste.yml
 
 appimage:
-	nix2appimage.sh $(nix-build)
+	./scripts/make-appimage.sh

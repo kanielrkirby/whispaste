@@ -1,6 +1,5 @@
 app-id: com.github.whispaste
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
 sdk: org.freedesktop.Sdk
 command: whispaste
 
@@ -30,17 +29,3 @@ modules:
     sources:
       - type: dir
         path: .
-
-    modules:
-      - name: python-modules
-        buildsystem: simple
-        build-commands: []
-        sources:
-          - type: archive
-            url: https://files.pythonhosted.org/packages/py3/o/p/portalocker/portalocker-2.10.1-py3-none-any.whl
-            sha256: 6a5d2a2e486928e4896a076799d6f6e99262341535802037373507123456789
-
-  - name: python-deps
-    buildsystem: simple
-    build-commands:
-      - pip3 install --prefix=/app --no-index --find-links='' openai python-dotenv sounddevice numpy pyperclip
