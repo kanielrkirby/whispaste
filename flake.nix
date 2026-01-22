@@ -44,39 +44,40 @@
       });
 
       # Snap build output for Linux
-      snapPackages = forAllSystems (system: 
+      snapPackages = forAllSystems (system:
         if pkgs.stdenv.isLinux then
+          let
+            pythonApp = pkgs.python312Packages.buildPythonApplication {
+              pname = "whispaste";
+              version = "0.1.0";
+              pyproject = true;
+              src = ./.;
+              propagatedBuildInputs = with pkgs.python312Packages; [
+                openai
+                python-dotenv
+                sounddevice
+                numpy
+                pyperclip
+              ];
+              nativeBuildInputs = [ pkgs.python312Packages.setuptools ];
+              buildInputs = [
+                pkgs.portaudio
+                pkgs.libnotify
+              ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+                pkgs.wl-clipboard
+                pkgs.xdotool
+                pkgs.ydotool
+                pkgs.wtype
+              ];
+              meta = {
+                description = "Simple voice-to-paste tool";
+                license = pkgs.lib.licenses.mit;
+              };
+            };
+          in
           pkgs.buildEnv {
             name = "whispaste-snap-${system}";
-            paths = [
-              (pkgs.python312Packages.buildPythonApplication {
-                pname = "whispaste";
-                version = "0.1.0";
-                pyproject = true;
-                src = ./.;
-                propagatedBuildInputs = with pkgs.python312Packages; [
-                  openai
-                  python-dotenv
-                  sounddevice
-                  numpy
-                  pyperclip
-                ];
-                nativeBuildInputs = [ pkgs.python312Packages.setuptools ];
-                buildInputs = [
-                  pkgs.portaudio
-                  pkgs.libnotify
-                ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
-                  pkgs.wl-clipboard
-                  pkgs.xdotool
-                  pkgs.ydotool
-                  pkgs.wtype
-                ];
-                meta = {
-                  description = "Simple voice-to-paste tool";
-                  license = pkgs.lib.licenses.mit;
-                };
-              })
-            ];
+            paths = [ pythonApp ];
           }
         else {}
       );
