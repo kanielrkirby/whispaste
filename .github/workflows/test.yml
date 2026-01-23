@@ -21,18 +21,15 @@ jobs:
       - name: Build Nix package
         run: nix build
 
-      - name: Install build tools
-        run: |
-          nix-env -iA nixpkgs.nfpm
-          nix-env -iA nixpkgs.python312Packages.build
-
       - name: Build all packages
         run: |
-          nfpm package -p deb
-          nfpm package -p rpm
-          nfpm package -p apk
-          nfpm package -p archlinux
-          python -m build
+          nix develop --command bash -c "
+            nfpm package -p deb
+            nfpm package -p rpm
+            nfpm package -p apk
+            nfpm package -p archlinux
+            python -m build
+          "
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
