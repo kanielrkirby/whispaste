@@ -1,4 +1,4 @@
-.PHONY: help build deb rpm apk archlinux pip snap flatpak appimage everything clean
+.PHONY: help build deb rpm apk archlinux pip snap flatpak appimage everything clean test test-deb test-rpm test-apk test-archlinux test-pip
 
 help:
 	@echo "Package whispaste for multiple platforms"
@@ -13,9 +13,17 @@ help:
 	@echo "  all        - Build all nfpm packages"
 	@echo "  snap       - Build Snap package"
 	@echo "  flatpak    - Build Flatpak bundle"
-	@echo "  appimage    - Build AppImage bundle"
-	@echo "  everything  - Build all packages"
+	@echo "  appimage   - Build AppImage bundle"
+	@echo "  everything - Build all packages"
 	@echo "  clean      - Remove build artifacts"
+	@echo ""
+	@echo "Testing (requires Docker):"
+	@echo "  test         - Run all package installation tests"
+	@echo "  test-deb     - Test .deb package on Debian"
+	@echo "  test-rpm     - Test .rpm package on Fedora"
+	@echo "  test-apk     - Test .apk package on Alpine"
+	@echo "  test-archlinux - Test Arch package on Arch Linux"
+	@echo "  test-pip     - Test pip wheel on Debian"
 
 build:
 	nix build
@@ -57,3 +65,22 @@ flatpak:
 
 appimage:
 	./scripts/make-appimage.sh
+
+# Testing targets (require Docker)
+test:
+	./tests/test-packages.sh
+
+test-deb:
+	./tests/test-packages.sh deb
+
+test-rpm:
+	./tests/test-packages.sh rpm
+
+test-apk:
+	./tests/test-packages.sh apk
+
+test-archlinux:
+	./tests/test-packages.sh archlinux
+
+test-pip:
+	./tests/test-packages.sh pip pip_sdist
