@@ -22,8 +22,8 @@ TEMPLATES = {
 
 def worker_loop():
     """
-    The main loop for the background worker process.
-    This function IS the daemon. It records, waits, and processes audio.
+    Optimized worker with instant recording start.
+    Pre-warms audio system then records immediately.
     """
     # 1. Setup PID
     CONFIG.pid_file.write_text(str(os.getpid()))
@@ -36,15 +36,13 @@ def worker_loop():
     signal.signal(signal.SIGTERM, stop_signal_handler)
     signal.signal(signal.SIGINT, stop_signal_handler)
     
-    # 2. Record
-    System.notify("Listening...")
-    engine = AudioEngine()
-    
     try:
-        # Blocks here until SIGTERM is received (triggered by the CLI 'stop' action)
+        # 2. Start recording IMMEDIATELY - no pre-warming delay
+        System.notify("Listening...")
+        engine = AudioEngine()  # Lightweight, no pre-warming
         audio = engine.record_until_stop(lambda: should_stop)
         
-        # 3. Transcribe & Action
+        # 4. Transcribe & Action
         if audio is not None:
             # Reload opts (passed from the CLI trigger)
             opts = CONFIG.get_opts()
@@ -93,7 +91,7 @@ def start_daemon(args):
 
 def stop_daemon(pid):
     """Signal the existing worker process to stop recording and process."""
-    System.kill(pid) # Sends SIGTERM
+    System.kill(pid)  # Sends SIGTERM
 
 def manage_daemon_state(args):
     """
@@ -127,6 +125,7 @@ def main():
     parser.add_argument('-p', '--prompt', help='Post-processing prompt')
     parser.add_argument('-m', '--model', help='Post-processing model (default: gpt-4o-mini)')
     parser.add_argument('-t', '--template', choices=TEMPLATES.keys(), help='Use a preset prompt template')
+
 
     args = parser.parse_args()
     

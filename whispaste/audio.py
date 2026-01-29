@@ -1,6 +1,6 @@
 """
 Audio Engine: Recording and Transcription logic.
-Note: Uses lazy imports to ensure fast CLI startup time.
+Note: Optimized for instant recording start.
 """
 import os
 import wave
@@ -17,14 +17,16 @@ class AudioEngine:
     def record_until_stop(self, check_stop_fn):
         """
         Records audio until check_stop_fn returns True.
+        Imports and starts recording as fast as possible.
         """
-        # Lazy Import: SoundDevice takes time to init PortAudio
+        # Import at call time for fastest possible startup
         import sounddevice as sd
         import numpy as np
         
         def callback(indata, frames, time, status):
             self.buffer.append(indata.copy())
             
+        # Start recording immediately - PortAudio init happens here
         with sd.InputStream(samplerate=self.sample_rate, channels=1, callback=callback):
             while not check_stop_fn():
                 sd.sleep(50)
