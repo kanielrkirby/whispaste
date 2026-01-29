@@ -21,8 +21,13 @@ modules:
   - name: whispaste
     buildsystem: simple
     build-commands:
+      # Install the package and dependencies to /app
+      - pip3 install --prefix=/app --no-deps .
+      # We assume dependencies are already gathered or we rely on flatpak pip generator if we were using it.
+      # But strictly following the previous pattern where we list deps manually:
       - pip3 install --prefix=/app openai python-dotenv sounddevice numpy pyperclip
-      - install -Dm755 whispaste.py /app/bin/whispaste
+      
+      # Install desktop file and metainfo
       - install -D flatpak/com.github.whispaste.desktop /app/share/applications/com.github.whispaste.desktop
       - install -Dm644 flatpak/com.github.whispaste.metainfo.xml /app/share/metainfo/com.github.whispaste.metainfo.xml
 
