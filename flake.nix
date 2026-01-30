@@ -20,6 +20,7 @@
           openai
           python-dotenv
           sounddevice
+          cffi  # Required by sounddevice
           numpy
           pyperclip
         ];

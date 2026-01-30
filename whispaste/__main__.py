@@ -72,6 +72,8 @@ def worker_loop():
 
 def start_daemon(args):
     """Spawn the worker process in the background."""
+    import os
+    
     # Save options for the worker to read
     opts = {
         'clipboard': args.clipboard,
@@ -81,12 +83,22 @@ def start_daemon(args):
     CONFIG.save_opts(opts)
     
     # Launch the worker package as a detached subprocess
+    # Use sys.argv[0] to preserve the wrapped executable path in Nix
+    executable = sys.argv[0]  # This will be the whispaste wrapper, not bare python
+    System.log(f"Starting daemon: {executable} --daemon")
+    
+    # Preserve the current environment including PYTHONPATH
+    env = os.environ.copy()
+    # Add current sys.path to PYTHONPATH to ensure daemon has same Python path
+    env['PYTHONPATH'] = ':'.join(sys.path)
+    
     subprocess.Popen(
-        [sys.executable, '-m', 'whispaste', '--daemon'],
+        [executable, '--daemon'],
         start_new_session=True,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        stdin=subprocess.DEVNULL
+        stdin=subprocess.DEVNULL,
+        env=env  # Pass environment with full Python path
     )
 
 def stop_daemon(pid):
